@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo App</title>
+
+    <style>
+        body{
+            font-family:Arial;
+            background:#f4f4f4;
+            display:flex;
+            justify-content:center;
+            padding:40px;
+        }
+
+        .container{
+            width:420px;
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        h2{
+            text-align:center;
+        }
+
+        input,button{
+            width:100%;
+            padding:12px;
+            margin:6px 0;
+            box-sizing:border-box;
+        }
+
+        button{
+            border:none;
+            cursor:pointer;
+            border-radius:6px;
+        }
+
+        .add-btn{
+            background:green;
+            color:white;
+        }
+
+        li{
+            list-style:none;
+            border:1px solid #ddd;
+            padding:12px;
+            margin:10px 0;
+            border-radius:8px;
+        }
+
+        .completed{
+            background:#d4edda;
+            text-decoration:line-through;
+        }
+
+        .actions{
+            margin-top:8px;
+        }
+
+        .actions button{
+            width:auto;
+            padding:6px 10px;
+            margin-right:5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>My Tasks</h2>
+
+    <input id="taskInput" placeholder="Enter task">
+    <input id="dateInput" type="datetime-local">
+
+    <button class="add-btn" onclick="addTask()">
+        Add Task
+    </button>
+
+    <ul id="taskList"></ul>
+
+</div>
+
+
+<script>
+
+let tasks =
+JSON.parse(localStorage.getItem("tasks")) || [];
+
+const taskInput =
+document.getElementById("taskInput");
+
+const dateInput =
+document.getElementById("dateInput");
+
+const taskList =
+document.getElementById("taskList");
+
+
+function addTask(){
+
+    if(!taskInput.value.trim()) return;
+
+    tasks.push({
+
+        id: Date.now(),
+
+        text: taskInput.value,
+
+        date: dateInput.value || "No date",
+
+        done:false
+
+    });
+
+    taskInput.value = "";
+    dateInput.value = "";
+
+    updateUI();
+}
+
+
+function toggleTask(id){
+
+    tasks = tasks.map(task=>
+
+        task.id===id
+        ? {...task,done:!task.done}
+        : task
+
+    );
+
+    updateUI();
+}
+
+
+function deleteTask(id){
+
+    tasks =
+    tasks.filter(task=>task.id!==id);
+
+    updateUI();
+}
+
+
+function editTask(id){
+
+    let task =
+    tasks.find(t=>t.id===id);
+
+    let newText =
+    prompt("Edit task",task.text);
+
+    if(newText){
+
+        task.text = newText;
+
+        updateUI();
+    }
+}
+
+
+function updateUI(){
+
+    localStorage.setItem(
+        "tasks",
+        JSON.stringify(tasks)
+    );
+
+    taskList.innerHTML = "";
+
+    tasks.forEach(task=>{
+
+        taskList.innerHTML += `
+
+        <li class="${task.done ? "completed" : ""}">
+
+            <b>${task.text}</b><br>
+
+            📅 ${task.date}
+
+            <div class="actions">
+
+                <button
+                onclick="toggleTask(${task.id})">
+
+                ${task.done ? "Undo" : "Done"}
+
+                </button>
+
+                <button
+                onclick="editTask(${task.id})">
+
+                Edit
+
+                </button>
+
+                <button
+                onclick="deleteTask(${task.id})">
+
+                Delete
+
+                </button>
+
+            </div>
+
+        </li>
+        `;
+    });
+}
+
+
+updateUI();
+
+</script>
+
+</body>
+</html>
